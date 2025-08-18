@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, Alert, Platform, TouchableOpacity, Linking } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
@@ -110,7 +111,7 @@ export default function ChatScreen() {
   // For web platform, show a message instead of WebView to avoid cross-origin issues
   if (Platform.OS === 'web') {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <StatusBar style="light" backgroundColor="#2563EB" />
         <View style={styles.webMessageContainer}>
           <MessageCircle size={64} color="#2563EB" />
@@ -122,7 +123,7 @@ export default function ChatScreen() {
             <Text style={styles.openButtonText}>打开 FufflyChat</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -181,7 +182,7 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar style="light" backgroundColor="#2563EB" />
       
       {hasError ? (
@@ -226,7 +227,7 @@ export default function ChatScreen() {
           )}
         </>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -8,6 +8,7 @@ import {
   Linking,
   Alert 
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
   Settings as SettingsIcon, 
   Info, 
@@ -91,7 +92,8 @@ export default function SettingsScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>设置</Text>
       </View>
@@ -139,7 +141,8 @@ export default function SettingsScreen() {
           Built with ❤️ for FufflyChat users
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -148,9 +151,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
+  scrollView: {
+    flex: 1,
+  },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 20,
     backgroundColor: '#2563EB',
   },

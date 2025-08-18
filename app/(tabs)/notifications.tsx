@@ -8,6 +8,7 @@ import {
   Switch,
   Alert 
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 import { Bell, BellOff, Settings as SettingsIcon } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -174,7 +175,7 @@ export default function NotificationsScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>通知中心</Text>
         <TouchableOpacity onPress={clearAllNotifications}>
@@ -253,7 +254,7 @@ export default function NotificationsScreen() {
           />
         )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 20,
     backgroundColor: '#2563EB',
   },
