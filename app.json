@@ -1,23 +1,23 @@
 {
   "expo": {
-    "name": "FufflyChat",
-    "slug": "fufflychat-app",
-    "version": "1.0.0",
+    "name": "FM619",
+    "slug": "fm619-app",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "fufflychat",
+    "scheme": "fm619",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.fufflychat.app"
+      "bundleIdentifier": "com.fm619.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#2563EB"
       },
-      "package": "com.fufflychat.app",
+      "package": "com.fm619.app",
       "versionCode": 1,
       "compileSdkVersion": 34,
       "targetSdkVersion": 34,
