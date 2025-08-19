@@ -37,8 +37,8 @@ export default function SettingsScreen() {
 
   const showAbout = () => {
     Alert.alert(
-      '关于 FufflyChat',
-      `版本: ${appVersion}\n\n这是 FufflyChat 的官方安卓应用，提供与网页版相同的功能，并支持推送通知。\n\n由 Bolt 构建`,
+      '关于 FM619',
+      `版本: ${appVersion}\n\n这是 FM619 的官方安卓应用，提供与网页版相同的功能，并支持推送通知。\n\n由 Bolt 构建`,
       [{ text: '确定' }]
     );
   };
@@ -64,7 +64,7 @@ export default function SettingsScreen() {
     {
       icon: Globe,
       title: '访问网页版',
-      subtitle: '在浏览器中打开 FufflyChat',
+      subtitle: '在浏览器中打开 FM619',
       onPress: openWebsite,
       showArrow: true,
     },
@@ -103,7 +103,7 @@ export default function SettingsScreen() {
         <View style={styles.infoCard}>
           <MessageCircle size={32} color="#2563EB" strokeWidth={2} />
           <View style={styles.infoContent}>
-            <Text style={styles.appName}>FufflyChat</Text>
+            <Text style={styles.appName}>FM619</Text>
             <Text style={styles.appDescription}>原生安卓聊天应用</Text>
           </View>
         </View>
@@ -138,7 +138,7 @@ export default function SettingsScreen() {
           Powered by Expo & React Native
         </Text>
         <Text style={styles.footerSubtext}>
-          Built with ❤️ for FufflyChat users
+          Built with ❤️ for FM619 users
         </Text>
       </View>
       </ScrollView>

@@ -42,7 +42,7 @@ export default function NotificationsScreen() {
     const subscription = Notifications.addNotificationReceivedListener(notification => {
       const newNotification: NotificationItem = {
         id: Date.now().toString(),
-        title: notification.request.content.title || 'FufflyChat',
+        title: notification.request.content.title || 'FM619',
         body: notification.request.content.body || '新消息',
         time: new Date().toLocaleTimeString('zh-CN', { 
           hour: '2-digit', 
@@ -170,8 +170,8 @@ export default function NotificationsScreen() {
     }
 
     const testMessage = isPengpaiOS ? 
-      'FufflyChat 澎湃OS测试' : 
-      'FufflyChat 测试';
+      'FM619 澎湃OS测试' : 
+      'FM619 测试';
     const testBody = isPengpaiOS ? 
       '这是澎湃OS优化的测试通知' : 
       '这是一条测试通知消息';
@@ -182,7 +182,7 @@ export default function NotificationsScreen() {
       Alert.alert(
         '澎湃OS测试通知已发送',
         '如果没有收到通知，请检查澎湃OS的通知设置：\n\n' +
-        '1. 设置 > 应用设置 > 应用管理 > FufflyChat\n' +
+        '1. 设置 > 应用设置 > 应用管理 > FM619\n' +
         '2. 通知管理 > 允许通知\n' +
         '3. 锁屏显示 > 开启\n' +
         '4. 自启动管理 > 允许\n' +
@@ -192,7 +192,7 @@ export default function NotificationsScreen() {
       Alert.alert(
         '测试通知已发送',
         '如果没有收到通知，请检查小米手机的通知设置：\n\n' +
-        '1. 设置 > 应用管理 > FufflyChat\n' +
+        '1. 设置 > 应用管理 > FM619\n' +
         '2. 开启自启动权限\n' +
         '3. 关闭省电策略\n' +
         '4. 允许后台活动'

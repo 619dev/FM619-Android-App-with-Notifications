@@ -87,7 +87,7 @@ export function useNotifications(): NotificationHook {
         enableLights: true,
         enableVibration: true,
         showBadge: true,
-        description: 'FufflyChat 消息提醒',
+        description: 'FM619 消息提醒',
       });
 
       // 澎湃OS专用通知渠道
@@ -101,7 +101,7 @@ export function useNotifications(): NotificationHook {
           enableLights: true,
           enableVibration: true,
           showBadge: true,
-          description: '澎湃OS专用高优先级通知渠道',
+          description: 'FM619 澎湃OS专用高优先级通知渠道',
           lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
         });
       }
@@ -161,7 +161,7 @@ export function useNotifications(): NotificationHook {
       Alert.alert(
         '澎湃OS通知设置',
         '澎湃OS需要特殊的通知权限设置，请按以下步骤操作：\n\n' +
-        '1. 设置 > 应用设置 > 应用管理 > FufflyChat\n' +
+        '1. 设置 > 应用设置 > 应用管理 > FM619\n' +
         '2. 通知管理 > 允许通知 > 开启\n' +
         '3. 锁屏显示 > 开启\n' +
         '4. 横幅样式 > 开启\n' +
@@ -214,8 +214,8 @@ export function useNotifications(): NotificationHook {
               text: '前往设置', 
               onPress: () => {
                 // 尝试打开应用设置页面
-                Linking.openSettings().catch(() => {
-                  Alert.alert('提示', '请手动前往设置 > 应用管理 > FufflyChat 进行设置');
+                  Alert.alert('提示', '请手动前往 设置 > 应用设置 > 应用管理 > FM619 进行设置');
+                  Alert.alert('提示', '请手动前往设置 > 应用管理 > FM619 进行设置');
                 });
               }
             }

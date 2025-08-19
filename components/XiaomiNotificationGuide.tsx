@@ -11,20 +11,20 @@ export default function XiaomiNotificationGuide({ onClose }: XiaomiNotificationG
     {
       icon: Settings,
       title: '打开应用设置',
-      description: '设置 > 应用管理 > FufflyChat',
-      details: '在手机设置中找到应用管理，然后找到 FufflyChat 应用'
+      description: '设置 > 应用管理 > FM619',
+      details: '在手机设置中找到应用管理，然后找到 FM619 应用'
     },
     {
       icon: CheckCircle,
       title: '开启自启动',
       description: '允许应用自启动',
-      details: '在应用信息页面，找到"自启动管理"，开启 FufflyChat 的自启动权限'
+      details: '在应用信息页面，找到"自启动管理"，开启 FM619 的自启动权限'
     },
     {
       icon: Battery,
       title: '关闭省电策略',
       description: '设置为"无限制"',
-      details: '在"省电策略"或"电池优化"中，将 FufflyChat 设置为"无限制"模式'
+      details: '在"省电策略"或"电池优化"中，将 FM619 设置为"无限制"模式'
     },
     {
       icon: Bell,
@@ -40,7 +40,7 @@ export default function XiaomiNotificationGuide({ onClose }: XiaomiNotificationG
         <Smartphone size={32} color="#FF6900" strokeWidth={2} />
         <Text style={styles.title}>小米手机通知设置指南</Text>
         <Text style={styles.subtitle}>
-          为了确保能正常接收 FufflyChat 消息通知，请按以下步骤进行设置
+          为了确保能正常接收 FM619 消息通知，请按以下步骤进行设置
         </Text>
       </View>
 

@@ -90,7 +90,7 @@ export default function ChatScreen() {
       // 发送一个静默的保活通知（澎湃OS优化）
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'FufflyChat',
+          title: 'FM619',
           body: isPengpaiOS ? '澎湃OS保持连接中...' : '保持连接中...',
           sound: false,
           priority: isPengpaiOS ? Notifications.AndroidNotificationPriority.DEFAULT : Notifications.AndroidNotificationPriority.LOW,
@@ -144,12 +144,12 @@ export default function ChatScreen() {
         <StatusBar style="light" backgroundColor="#2563EB" />
         <View style={styles.webMessageContainer}>
           <MessageCircle size={64} color="#2563EB" />
-          <Text style={styles.webMessageTitle}>FufflyChat</Text>
+          <Text style={styles.webMessageTitle}>FM619</Text>
           <Text style={styles.webMessageText}>
-            在网页版中，请直接访问 FufflyChat 网站获得最佳体验
+            在网页版中，请直接访问 FM619 网站获得最佳体验
           </Text>
           <TouchableOpacity style={styles.openButton} onPress={openInBrowser}>
-            <Text style={styles.openButtonText}>打开 FufflyChat</Text>
+            <Text style={styles.openButtonText}>打开 FM619</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -202,7 +202,7 @@ export default function ChatScreen() {
       const data = JSON.parse(event.nativeEvent.data);
       if (data.type === 'NEW_MESSAGE') {
         // 使用针对澎湃OS优化的通知方法
-        const title = isPengpaiOS ? 'FufflyChat 澎湃OS' : 'FufflyChat';
+        const title = isPengpaiOS ? 'FM619 澎湃OS' : 'FM619';
         const body = isPengpaiOS ? '您有新消息 (澎湃OS优化)' : '您有新消息';
         await scheduleNotification(title, body);
       }
@@ -246,14 +246,14 @@ export default function ChatScreen() {
             mixedContentMode="always"
             allowsInlineMediaPlayback={true}
             mediaPlaybackRequiresUserAction={false}
-            userAgent={isPengpaiOS ? "FufflyChat-PengpaiOS-App/1.0" : "FufflyChat-Android-App/1.0"}
+            userAgent={isPengpaiOS ? "FM619-PengpaiOS-App/1.0" : "FM619-Android-App/1.0"}
           />
           
           {isLoading && (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#2563EB" />
               <Text style={styles.loadingText}>
-                {isPengpaiOS ? '正在加载 FufflyChat (澎湃OS优化)...' : '正在加载 FufflyChat...'}
+                {isPengpaiOS ? '正在加载 FM619 (澎湃OS优化)...' : '正在加载 FM619...'}
               </Text>
             </View>
           )}

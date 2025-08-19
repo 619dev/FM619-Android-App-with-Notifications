@@ -11,8 +11,8 @@ export default function PengpaiOSNotificationGuide({ onClose }: PengpaiOSNotific
     {
       icon: Settings,
       title: '打开应用设置',
-      description: '设置 > 应用设置 > 应用管理 > FufflyChat',
-      details: '在澎湃OS设置中找到应用设置，然后找到 FufflyChat 应用'
+      description: '设置 > 应用设置 > 应用管理 > FM619',
+      details: '在澎湃OS设置中找到应用设置，然后找到 FM619 应用'
     },
     {
       icon: Bell,
@@ -58,7 +58,7 @@ export default function PengpaiOSNotificationGuide({ onClose }: PengpaiOSNotific
         <Smartphone size={32} color="#FF6900" strokeWidth={2} />
         <Text style={styles.title}>澎湃OS通知设置指南</Text>
         <Text style={styles.subtitle}>
-          澎湃OS基于Android 14，需要特殊的通知权限设置才能正常接收 FufflyChat 消息
+          澎湃OS基于Android 14，需要特殊的通知权限设置才能正常接收 FM619 消息
         </Text>
       </View>
 
@@ -96,7 +96,7 @@ export default function PengpaiOSNotificationGuide({ onClose }: PengpaiOSNotific
           <Text style={styles.tipTitle}>💡 澎湃OS专用技巧</Text>
           <Text style={styles.tipText}>
             • 澎湃OS的"智能省电"功能可能影响通知，建议关闭{'\n'}
-            • 在"安全中心"中将FufflyChat添加到白名单{'\n'}
+            • 在"安全中心"中将FM619添加到白名单{'\n'}
             • 使用"通知助手"功能可以提升通知优先级{'\n'}
             • 定期检查应用权限，系统更新后可能需要重新设置
           </Text>
