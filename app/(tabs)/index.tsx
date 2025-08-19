@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, Alert, Platform, TouchableOpacity, Linking } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, Alert, Platform, TouchableOpacity, Linking, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { StatusBar } from 'expo-status-bar';
@@ -7,28 +7,32 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { MessageCircle } from 'lucide-react-native';
+import { useNotifications } from '@/hooks/useNotifications';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
-    shouldSetBadge: false,
+    shouldSetBadge: true,
   }),
 });
 
 export default function ChatScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [expoPushToken, setExpoPushToken] = useState<string>('');
   const webViewRef = useRef<WebView>(null);
+  const { expoPushToken, checkXiaomiPermissions, scheduleNotification } = useNotifications();
+  const [hasCheckedXiaomi, setHasCheckedXiaomi] = useState(false);
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then(token => {
-      if (token) {
-        setExpoPushToken(token);
-      }
-    });
+    // 检查小米手机权限设置
+    if (!hasCheckedXiaomi) {
+      setTimeout(() => {
+        checkXiaomiPermissions();
+        setHasCheckedXiaomi(true);
+      }, 2000); // 延迟2秒显示，避免干扰用户体验
+    }
 
     // Listen for notification responses
     const subscription = Notifications.addNotificationResponseReceivedListener(response => {
@@ -36,9 +40,45 @@ export default function ChatScreen() {
       // You can handle notification taps here
     });
 
-    return () => subscription.remove();
+    // 监听应用状态变化
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'background') {
+        // 应用进入后台时发送保活通知（仅小米设备）
+        const brand = Device.brand?.toLowerCase();
+        if (brand?.includes('xiaomi') || brand?.includes('redmi')) {
+          scheduleKeepAliveNotification();
+        }
+      }
+    };
+
+    const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription.remove();
+      appStateSubscription?.remove();
+    };
   }, []);
 
+  const scheduleKeepAliveNotification = async () => {
+    try {
+      // 发送一个静默的保活通知
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'FufflyChat',
+          body: '保持连接中...',
+          sound: false,
+          priority: Notifications.AndroidNotificationPriority.LOW,
+          channelId: 'default',
+          data: { type: 'keepalive' },
+        },
+        trigger: {
+          seconds: 30,
+        },
+      });
+    } catch (error) {
+      console.log('Keep alive notification error:', error);
+    }
+  };
   const openInBrowser = async () => {
     const url = 'https://ok6.uk';
     const supported = await Linking.canOpenURL(url);
@@ -48,46 +88,6 @@ export default function ChatScreen() {
       Alert.alert('错误', '无法打开链接');
     }
   };
-
-  async function registerForPushNotificationsAsync() {
-    let token;
-
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#2563EB',
-      });
-    }
-
-    if (Device.isDevice) {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        Alert.alert('通知权限', '需要通知权限才能接收消息提醒');
-        return;
-      }
-      
-      try {
-        const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-        if (!projectId) {
-          throw new Error('Project ID not found');
-        }
-        token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-      } catch (e) {
-        console.log('Error getting push token:', e);
-      }
-    } else {
-      Alert.alert('设备要求', '必须使用物理设备才能接收推送通知');
-    }
-
-    return token;
-  }
 
   const handleLoadStart = () => {
     setIsLoading(true);
@@ -165,16 +165,8 @@ export default function ChatScreen() {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       if (data.type === 'NEW_MESSAGE') {
-        // Schedule a local notification
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'FufflyChat',
-            body: '您有新消息',
-            sound: true,
-            priority: Notifications.AndroidNotificationPriority.HIGH,
-          },
-          trigger: null, // Show immediately
-        });
+        // 使用优化的通知方法
+        await scheduleNotification('FufflyChat', '您有新消息');
       }
     } catch (error) {
       console.log('Error handling message:', error);

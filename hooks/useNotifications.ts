@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import { Platform } from 'react-native';
+import { Platform, Alert, Linking } from 'react-native';
 import Constants from 'expo-constants';
 
 export interface NotificationHook {
@@ -9,6 +9,7 @@ export interface NotificationHook {
   notification: Notifications.Notification | null;
   registerForPushNotifications: () => Promise<string | undefined>;
   scheduleNotification: (title: string, body: string) => Promise<void>;
+  checkXiaomiPermissions: () => Promise<void>;
 }
 
 export function useNotifications(): NotificationHook {
@@ -46,11 +47,29 @@ export function useNotifications(): NotificationHook {
     let token;
 
     if (Platform.OS === 'android') {
+      // 为小米手机创建高优先级通知渠道
       await Notifications.setNotificationChannelAsync('default', {
         name: 'default',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#2563EB',
+        sound: true,
+        enableLights: true,
+        enableVibration: true,
+        showBadge: true,
+      });
+
+      // 创建专门的消息通知渠道
+      await Notifications.setNotificationChannelAsync('messages', {
+        name: '消息通知',
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#2563EB',
+        sound: true,
+        enableLights: true,
+        enableVibration: true,
+        showBadge: true,
+        description: 'FufflyChat 消息提醒',
       });
     }
 
@@ -83,6 +102,39 @@ export function useNotifications(): NotificationHook {
     return token;
   }
 
+  async function checkXiaomiPermissions(): Promise<void> {
+    if (Platform.OS === 'android') {
+      // 检测是否为小米设备
+      const brand = Device.brand?.toLowerCase();
+      const manufacturer = Device.manufacturer?.toLowerCase();
+      
+      if (brand?.includes('xiaomi') || manufacturer?.includes('xiaomi') || 
+          brand?.includes('redmi') || manufacturer?.includes('redmi')) {
+        
+        Alert.alert(
+          '小米手机通知设置',
+          '为了确保能正常接收消息通知，请按以下步骤设置：\n\n' +
+          '1. 允许应用自启动\n' +
+          '2. 关闭省电策略限制\n' +
+          '3. 允许后台活动\n' +
+          '4. 设置通知为重要\n\n' +
+          '是否现在前往设置？',
+          [
+            { text: '稍后设置', style: 'cancel' },
+            { 
+              text: '前往设置', 
+              onPress: () => {
+                // 尝试打开应用设置页面
+                Linking.openSettings().catch(() => {
+                  Alert.alert('提示', '请手动前往设置 > 应用管理 > FufflyChat 进行设置');
+                });
+              }
+            }
+          ]
+        );
+      }
+    }
+  }
   async function scheduleNotification(title: string, body: string): Promise<void> {
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -90,6 +142,9 @@ export function useNotifications(): NotificationHook {
         body,
         sound: true,
         priority: Notifications.AndroidNotificationPriority.HIGH,
+        channelId: 'messages',
+        categoryIdentifier: 'message',
+        badge: 1,
       },
       trigger: null,
     });
@@ -100,5 +155,6 @@ export function useNotifications(): NotificationHook {
     notification,
     registerForPushNotifications,
     scheduleNotification,
+    checkXiaomiPermissions,
   };
 }

@@ -6,12 +6,15 @@ import {
   FlatList, 
   TouchableOpacity, 
   Switch,
-  Alert 
+  Alert,
+  Platform 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
-import { Bell, BellOff, Settings as SettingsIcon } from 'lucide-react-native';
+import { Bell, BellOff, Settings as SettingsIcon, Smartphone } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Device from 'expo-device';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface NotificationItem {
   id: string;
@@ -26,10 +29,13 @@ export default function NotificationsScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
+  const [isXiaomiDevice, setIsXiaomiDevice] = useState(false);
+  const { checkXiaomiPermissions, scheduleNotification } = useNotifications();
 
   useEffect(() => {
     loadSettings();
     loadNotifications();
+    checkDeviceBrand();
     
     // Listen for incoming notifications
     const subscription = Notifications.addNotificationReceivedListener(notification => {
@@ -50,6 +56,16 @@ export default function NotificationsScreen() {
 
     return () => subscription.remove();
   }, []);
+
+  const checkDeviceBrand = () => {
+    const brand = Device.brand?.toLowerCase();
+    const manufacturer = Device.manufacturer?.toLowerCase();
+    
+    if (brand?.includes('xiaomi') || manufacturer?.includes('xiaomi') || 
+        brand?.includes('redmi') || manufacturer?.includes('redmi')) {
+      setIsXiaomiDevice(true);
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -146,14 +162,18 @@ export default function NotificationsScreen() {
       return;
     }
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'FufflyChat 测试',
-        body: '这是一条测试通知消息',
-        sound: soundEnabled,
-      },
-      trigger: null,
-    });
+    await scheduleNotification('FufflyChat 测试', '这是一条测试通知消息');
+    
+    if (isXiaomiDevice) {
+      Alert.alert(
+        '测试通知已发送',
+        '如果没有收到通知，请检查小米手机的通知设置：\n\n' +
+        '1. 设置 > 应用管理 > FufflyChat\n' +
+        '2. 开启自启动权限\n' +
+        '3. 关闭省电策略\n' +
+        '4. 允许后台活动'
+      );
+    }
   };
 
   const renderNotification = ({ item }: { item: NotificationItem }) => (
@@ -234,6 +254,18 @@ export default function NotificationsScreen() {
         <TouchableOpacity style={styles.testButton} onPress={testNotification}>
           <Text style={styles.testButtonText}>发送测试通知</Text>
         </TouchableOpacity>
+
+        {isXiaomiDevice && (
+          <TouchableOpacity 
+            style={[styles.testButton, styles.xiaomiButton]} 
+            onPress={checkXiaomiPermissions}
+          >
+            <Smartphone size={16} color="#FFFFFF" strokeWidth={2} />
+            <Text style={[styles.testButtonText, { marginLeft: 8 }]}>
+              小米手机设置指南
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.notificationsSection}>
@@ -324,6 +356,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  xiaomiButton: {
+    backgroundColor: '#FF6900',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
   },
   notificationsSection: {
     flex: 1,
