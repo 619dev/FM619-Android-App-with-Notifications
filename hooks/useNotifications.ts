@@ -214,8 +214,8 @@ export function useNotifications(): NotificationHook {
               text: '前往设置', 
               onPress: () => {
                 // 尝试打开应用设置页面
+                Linking.openSettings().catch(() => {
                   Alert.alert('提示', '请手动前往 设置 > 应用设置 > 应用管理 > FM619 进行设置');
-                  Alert.alert('提示', '请手动前往设置 > 应用管理 > FM619 进行设置');
                 });
               }
             }
