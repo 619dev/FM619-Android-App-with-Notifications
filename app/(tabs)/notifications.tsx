@@ -30,7 +30,8 @@ export default function NotificationsScreen() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
   const [isXiaomiDevice, setIsXiaomiDevice] = useState(false);
-  const { checkXiaomiPermissions, scheduleNotification } = useNotifications();
+  const [isPengpaiOS, setIsPengpaiOS] = useState(false);
+  const { checkXiaomiPermissions, checkPengpaiOSPermissions, scheduleNotification } = useNotifications();
 
   useEffect(() => {
     loadSettings();
@@ -57,13 +58,19 @@ export default function NotificationsScreen() {
     return () => subscription.remove();
   }, []);
 
-  const checkDeviceBrand = () => {
+  const checkDeviceBrand = async () => {
     const brand = Device.brand?.toLowerCase();
     const manufacturer = Device.manufacturer?.toLowerCase();
+    const osVersion = Device.osVersion;
     
     if (brand?.includes('xiaomi') || manufacturer?.includes('xiaomi') || 
         brand?.includes('redmi') || manufacturer?.includes('redmi')) {
       setIsXiaomiDevice(true);
+      
+      // 检测是否为澎湃OS (Android 14+)
+      if (osVersion?.includes('14') || parseInt(osVersion || '0') >= 14) {
+        setIsPengpaiOS(true);
+      }
     }
   };
 
@@ -162,9 +169,26 @@ export default function NotificationsScreen() {
       return;
     }
 
-    await scheduleNotification('FufflyChat 测试', '这是一条测试通知消息');
+    const testMessage = isPengpaiOS ? 
+      'FufflyChat 澎湃OS测试' : 
+      'FufflyChat 测试';
+    const testBody = isPengpaiOS ? 
+      '这是澎湃OS优化的测试通知' : 
+      '这是一条测试通知消息';
+      
+    await scheduleNotification(testMessage, testBody);
     
-    if (isXiaomiDevice) {
+    if (isPengpaiOS) {
+      Alert.alert(
+        '澎湃OS测试通知已发送',
+        '如果没有收到通知，请检查澎湃OS的通知设置：\n\n' +
+        '1. 设置 > 应用设置 > 应用管理 > FufflyChat\n' +
+        '2. 通知管理 > 允许通知\n' +
+        '3. 锁屏显示 > 开启\n' +
+        '4. 自启动管理 > 允许\n' +
+        '5. 省电策略 > 无限制'
+      );
+    } else if (isXiaomiDevice) {
       Alert.alert(
         '测试通知已发送',
         '如果没有收到通知，请检查小米手机的通知设置：\n\n' +
@@ -255,7 +279,17 @@ export default function NotificationsScreen() {
           <Text style={styles.testButtonText}>发送测试通知</Text>
         </TouchableOpacity>
 
-        {isXiaomiDevice && (
+        {isPengpaiOS ? (
+          <TouchableOpacity 
+            style={[styles.testButton, styles.pengpaiButton]} 
+            onPress={checkPengpaiOSPermissions}
+          >
+            <Smartphone size={16} color="#FFFFFF" strokeWidth={2} />
+            <Text style={[styles.testButtonText, { marginLeft: 8 }]}>
+              澎湃OS设置指南
+            </Text>
+          </TouchableOpacity>
+        ) : isXiaomiDevice && (
           <TouchableOpacity 
             style={[styles.testButton, styles.xiaomiButton]} 
             onPress={checkXiaomiPermissions}
@@ -358,6 +392,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   xiaomiButton: {
+    backgroundColor: '#FF6900',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  pengpaiButton: {
     backgroundColor: '#FF6900',
     flexDirection: 'row',
     alignItems: 'center',

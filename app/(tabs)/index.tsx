@@ -24,12 +24,21 @@ export default function ChatScreen() {
   const webViewRef = useRef<WebView>(null);
   const { expoPushToken, checkXiaomiPermissions, scheduleNotification } = useNotifications();
   const [hasCheckedXiaomi, setHasCheckedXiaomi] = useState(false);
+  const [isPengpaiOS, setIsPengpaiOS] = useState(false);
 
   useEffect(() => {
+    // 检测澎湃OS
+    checkIfPengpaiOS();
+    
     // 检查小米手机权限设置
     if (!hasCheckedXiaomi) {
       setTimeout(() => {
-        checkXiaomiPermissions();
+        if (isPengpaiOS) {
+          // 澎湃OS使用专门的检查方法
+          console.log('Detected PengpaiOS, using specialized notification setup');
+        } else {
+          checkXiaomiPermissions();
+        }
         setHasCheckedXiaomi(true);
       }, 2000); // 延迟2秒显示，避免干扰用户体验
     }
@@ -59,20 +68,40 @@ export default function ChatScreen() {
     };
   }, []);
 
+  const checkIfPengpaiOS = async () => {
+    try {
+      const brand = Device.brand?.toLowerCase();
+      const manufacturer = Device.manufacturer?.toLowerCase();
+      const osVersion = Device.osVersion;
+      
+      // 检测澎湃OS的特征
+      const isPengpai = (brand?.includes('xiaomi') || manufacturer?.includes('xiaomi') || 
+                        brand?.includes('redmi') || manufacturer?.includes('redmi')) &&
+                       (osVersion?.includes('14') || parseInt(osVersion || '0') >= 14);
+      
+      setIsPengpaiOS(isPengpai);
+    } catch (error) {
+      console.log('Error detecting PengpaiOS:', error);
+    }
+  };
+
   const scheduleKeepAliveNotification = async () => {
     try {
-      // 发送一个静默的保活通知
+      // 发送一个静默的保活通知（澎湃OS优化）
       await Notifications.scheduleNotificationAsync({
         content: {
           title: 'FufflyChat',
-          body: '保持连接中...',
+          body: isPengpaiOS ? '澎湃OS保持连接中...' : '保持连接中...',
           sound: false,
-          priority: Notifications.AndroidNotificationPriority.LOW,
-          channelId: 'default',
-          data: { type: 'keepalive' },
+          priority: isPengpaiOS ? Notifications.AndroidNotificationPriority.DEFAULT : Notifications.AndroidNotificationPriority.LOW,
+          channelId: isPengpaiOS ? 'pengpai_priority' : 'default',
+          data: { 
+            type: 'keepalive',
+            pengpaiOS: isPengpaiOS,
+          },
         },
         trigger: {
-          seconds: 30,
+          seconds: isPengpaiOS ? 60 : 30, // 澎湃OS使用更长的间隔
         },
       });
     } catch (error) {
@@ -143,6 +172,13 @@ export default function ChatScreen() {
       
       // Improve touch interactions
       document.body.style.touchAction = 'manipulation';
+      
+      // 澎湃OS专用优化
+      if (window.navigator.userAgent.includes('PengpaiOS') || 
+          window.navigator.userAgent.includes('Android 14')) {
+        document.body.style.webkitTapHighlightColor = 'transparent';
+        document.body.style.webkitTouchCallout = 'none';
+      }
     });
     
     // Listen for new messages and trigger local notifications
@@ -165,8 +201,10 @@ export default function ChatScreen() {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       if (data.type === 'NEW_MESSAGE') {
-        // 使用优化的通知方法
-        await scheduleNotification('FufflyChat', '您有新消息');
+        // 使用针对澎湃OS优化的通知方法
+        const title = isPengpaiOS ? 'FufflyChat 澎湃OS' : 'FufflyChat';
+        const body = isPengpaiOS ? '您有新消息 (澎湃OS优化)' : '您有新消息';
+        await scheduleNotification(title, body);
       }
     } catch (error) {
       console.log('Error handling message:', error);
@@ -208,13 +246,15 @@ export default function ChatScreen() {
             mixedContentMode="always"
             allowsInlineMediaPlayback={true}
             mediaPlaybackRequiresUserAction={false}
-            userAgent="FufflyChat-Android-App/1.0"
+            userAgent={isPengpaiOS ? "FufflyChat-PengpaiOS-App/1.0" : "FufflyChat-Android-App/1.0"}
           />
           
           {isLoading && (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#2563EB" />
-              <Text style={styles.loadingText}>正在加载 FufflyChat...</Text>
+              <Text style={styles.loadingText}>
+                {isPengpaiOS ? '正在加载 FufflyChat (澎湃OS优化)...' : '正在加载 FufflyChat...'}
+              </Text>
             </View>
           )}
         </>
