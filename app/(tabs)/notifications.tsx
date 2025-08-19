@@ -6,15 +6,12 @@ import {
   FlatList, 
   TouchableOpacity, 
   Switch,
-  Alert,
-  Platform 
+  Alert 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
-import { Bell, BellOff, Settings as SettingsIcon, Smartphone } from 'lucide-react-native';
+import { Bell, BellOff, Settings as SettingsIcon } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Device from 'expo-device';
-import { useNotifications } from '@/hooks/useNotifications';
 
 interface NotificationItem {
   id: string;
@@ -24,19 +21,25 @@ interface NotificationItem {
   read: boolean;
 }
 
+// Configure notification behavior
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
-  const [isXiaomiDevice, setIsXiaomiDevice] = useState(false);
-  const [isPengpaiOS, setIsPengpaiOS] = useState(false);
-  const { checkXiaomiPermissions, checkPengpaiOSPermissions, scheduleNotification } = useNotifications();
 
   useEffect(() => {
     loadSettings();
     loadNotifications();
-    checkDeviceBrand();
+    setupNotificationChannels();
     
     // Listen for incoming notifications
     const subscription = Notifications.addNotificationReceivedListener(notification => {
@@ -58,20 +61,14 @@ export default function NotificationsScreen() {
     return () => subscription.remove();
   }, []);
 
-  const checkDeviceBrand = async () => {
-    const brand = Device.brand?.toLowerCase();
-    const manufacturer = Device.manufacturer?.toLowerCase();
-    const osVersion = Device.osVersion;
-    
-    if (brand?.includes('xiaomi') || manufacturer?.includes('xiaomi') || 
-        brand?.includes('redmi') || manufacturer?.includes('redmi')) {
-      setIsXiaomiDevice(true);
-      
-      // 检测是否为澎湃OS (Android 14+)
-      if (osVersion?.includes('14') || parseInt(osVersion || '0') >= 14) {
-        setIsPengpaiOS(true);
-      }
-    }
+  const setupNotificationChannels = async () => {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#2563EB',
+      sound: true,
+    });
   };
 
   const loadSettings = async () => {
@@ -169,35 +166,14 @@ export default function NotificationsScreen() {
       return;
     }
 
-    const testMessage = isPengpaiOS ? 
-      'FM619 澎湃OS测试' : 
-      'FM619 测试';
-    const testBody = isPengpaiOS ? 
-      '这是澎湃OS优化的测试通知' : 
-      '这是一条测试通知消息';
-      
-    await scheduleNotification(testMessage, testBody);
-    
-    if (isPengpaiOS) {
-      Alert.alert(
-        '澎湃OS测试通知已发送',
-        '如果没有收到通知，请检查澎湃OS的通知设置：\n\n' +
-        '1. 设置 > 应用设置 > 应用管理 > FM619\n' +
-        '2. 通知管理 > 允许通知\n' +
-        '3. 锁屏显示 > 开启\n' +
-        '4. 自启动管理 > 允许\n' +
-        '5. 省电策略 > 无限制'
-      );
-    } else if (isXiaomiDevice) {
-      Alert.alert(
-        '测试通知已发送',
-        '如果没有收到通知，请检查小米手机的通知设置：\n\n' +
-        '1. 设置 > 应用管理 > FM619\n' +
-        '2. 开启自启动权限\n' +
-        '3. 关闭省电策略\n' +
-        '4. 允许后台活动'
-      );
-    }
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'FM619 测试',
+        body: '这是一条测试通知消息',
+        sound: soundEnabled,
+      },
+      trigger: null,
+    });
   };
 
   const renderNotification = ({ item }: { item: NotificationItem }) => (
@@ -278,28 +254,6 @@ export default function NotificationsScreen() {
         <TouchableOpacity style={styles.testButton} onPress={testNotification}>
           <Text style={styles.testButtonText}>发送测试通知</Text>
         </TouchableOpacity>
-
-        {isPengpaiOS ? (
-          <TouchableOpacity 
-            style={[styles.testButton, styles.pengpaiButton]} 
-            onPress={checkPengpaiOSPermissions}
-          >
-            <Smartphone size={16} color="#FFFFFF" strokeWidth={2} />
-            <Text style={[styles.testButtonText, { marginLeft: 8 }]}>
-              澎湃OS设置指南
-            </Text>
-          </TouchableOpacity>
-        ) : isXiaomiDevice && (
-          <TouchableOpacity 
-            style={[styles.testButton, styles.xiaomiButton]} 
-            onPress={checkXiaomiPermissions}
-          >
-            <Smartphone size={16} color="#FFFFFF" strokeWidth={2} />
-            <Text style={[styles.testButtonText, { marginLeft: 8 }]}>
-              小米手机设置指南
-            </Text>
-          </TouchableOpacity>
-        )}
       </View>
 
       <View style={styles.notificationsSection}>
@@ -390,20 +344,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-  },
-  xiaomiButton: {
-    backgroundColor: '#FF6900',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  pengpaiButton: {
-    backgroundColor: '#FF6900',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
   },
   notificationsSection: {
     flex: 1,
