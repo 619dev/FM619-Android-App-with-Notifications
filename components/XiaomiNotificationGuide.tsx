@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Smartphone, CheckCircle, Settings, Battery, Bell } from 'lucide-react-native';
+import { Smartphone, CircleCheck as CheckCircle, Settings, Battery, Bell } from 'lucide-react-native';
 
 interface XiaomiNotificationGuideProps {
   onClose: () => void;
